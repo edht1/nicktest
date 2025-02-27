@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nick Diniz Official Website</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="nick.ico" type="image/x-icon">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E17RJY5EE7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-E17RJY5EE7');
+    </script>
+
+    <!-- Firebase & Voting Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAd1JK-vM-9GtO5TTZMjglFX3OOd5MVPsc",
+            authDomain: "nickd-184c1.firebaseapp.com",
+            projectId: "nickd-184c1",
+            storageBucket: "nickd-184c1.firebasestorage.app",
+            messagingSenderId: "674720445062",
+            appId: "1:674720445062:web:d09de9be138d5e05c25707",
+            measurementId: "G-FCH0QNJZ0R"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function vote(option) {
+            if (localStorage.getItem('hasVoted')) {
+                document.getElementById('voteMessage').textContent = "You've already voted.";
+                return;
+            }
+
+            const pollRef = doc(db, "polls", "results");
+            try {
+                await updateDoc(pollRef, { [option]: increment(1) });
+                localStorage.setItem('hasVoted', 'true');
+                document.getElementById('voteMessage').textContent = "Thank you for voting!";
+                document.querySelectorAll('.poll-options button').forEach(btn => btn.disabled = true);
+                gtag('event', 'poll_vote', { 'event_category': 'Poll', 'event_label': option, 'value': 1 });
+            } catch (error) {
+                document.getElementById('voteMessage').textContent = "Error submitting vote. Try again.";
+            }
+        }
+
+        window.vote = vote;
+    </script>
+</head>
+<body>
+    <div class="poll-container">
+        <h1>Keep NickDiniz.com running?</h1>
+        <div class="poll-options">
+            <button onclick="vote('Yes')">Yes</button>
+            <button onclick="vote('No')">No</button>
+        </div>
+        <p id="voteMessage"></p>
+    </div>
+</body>
+</html>
